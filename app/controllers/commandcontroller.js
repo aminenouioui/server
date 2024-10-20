@@ -1,23 +1,22 @@
-const Produit = require("../models/prodModel.js"); 
+const Commande = require("../models/commande.js");
 
 // Create and Save a new Product
 exports.create = (req, res) => {
   // Validate request
-  if (!req.body.nom || !req.body.description || !req.body.prix || !req.body.image) {
+  if (!req.body.date || !req.body.client || !req.body.produit ) {
     return res.status(400).send({
-      message: "Le contenu du produit ne peut pas être vide.",
+      message: "Le contenu du commande ne peut pas être vide.",
     });
   }
 
-  const produit = new Produit({
-    nom: req.body.nom,
-    description: req.body.description,
-    prix: req.body.prix,
-    image:req.body.image
+  const commande = new Commande({
+    date: req.body.date,
+    client:req.body.client,
+    produit: req.body.produit,
   });
 
   // Save Product in the database
-  produit
+  commande
     .save()
     .then((data) => {
       res.send(data);
@@ -32,7 +31,7 @@ exports.create = (req, res) => {
 
 // Retrieve all products from the database.
 exports.findAll = (req, res) => {
-  Produit.find()
+  Commande.find().populate('produit.product')
     .then((data) => {
       res.send(data);
     })
@@ -46,7 +45,7 @@ exports.findAll = (req, res) => {
 
 // Find a single product with a productId
 exports.findOne = (req, res) => {
-  Produit.findById(req.params.productId)
+  commande.findById(req.params.productId)
     .then((data) => {
       if (!data) {
         return res.status(404).send({
@@ -62,7 +61,7 @@ exports.findOne = (req, res) => {
         });
       }
       return res.status(500).send({
-        message: "Erreur lors de la récupération du produit avec l'ID " + req.params.productId,
+        message: "Erreur lors de la récupération du commande avec l'ID " + req.params.productId,
       });
     });
 };
@@ -70,26 +69,26 @@ exports.findOne = (req, res) => {
 // Update a product identified by the productId in the request
 exports.update = (req, res) => {
   // Validate request
-  if (!req.body.nom || !req.body.description || !req.body.prix) {
+  if (!req.body.date || !req.body.client || !req.body.produit ) {
     return res.status(400).send({
-      message: "Le contenu du produit ne peut pas être vide.",
+      message: "Le contenu du commande ne peut pas être vide.",
     });
   }
 
   // Find product and update it with the request body
-  Produit.findByIdAndUpdate(
+  Commande.findByIdAndUpdate(
     req.params.productId,
     {
-      nom: req.body.nom,
-      description: req.body.description,
-      prix: req.body.prix,
+        date: req.body.date,
+        client: req.body.client,
+        produit: req.body.produit,
     },
     { new: true } // Return the updated product
   )
     .then((data) => {
       if (!data) {
         return res.status(404).send({
-          message: "Produit non trouvé avec l'ID " + req.params.productId,
+          message: "comande non trouvé avec l'ID " + req.params.commandeID,
         });
       }
       res.send(data);
@@ -97,34 +96,34 @@ exports.update = (req, res) => {
     .catch((err) => {
       if (err.kind === "ObjectId") {
         return res.status(404).send({
-          message: "Produit non trouvé avec l'ID " + req.params.productId,
+          message: "commande non trouvé avec l'ID " + req.params.commandeID,
         });
       }
       return res.status(500).send({
-        message: "Erreur lors de la mise à jour du produit avec l'ID " + req.params.productId,
+        message: "Erreur lors de la mise à jour du commande avec l'ID " + req.params.commandeID,
       });
     });
 };
 
 // Delete a product with the specified productId in the request
 exports.delete = (req, res) => {
-  Produit.findByIdAndDelete(req.params.productId)
+  Commande.findByIdAndDelete(req.params.commandeID)
     .then((data) => {
       if (!data) {
         return res.status(404).send({
-          message: "Produit non trouvé avec l'ID " + req.params.productId,
+          message: "commande non trouvé avec l'ID " + req.params.commandeID,
         });
       }
-      res.send({ message: "Produit supprimé avec succès!" });
+      res.send({ message: "commande supprimé avec succès!" });
     })
     .catch((err) => {
       if (err.kind === "ObjectId" || err.name === "NotFound") {
         return res.status(404).send({
-          message: "Produit non trouvé avec l'ID " + req.params.productId,
+          message: "commande non trouvé avec l'ID " + req.params.commandeID,
         });
       }
       return res.status(500).send({
-        message: "Impossible de supprimer le produit avec l'ID " + req.params.productId,
+        message: "Impossible de supprimer le commande avec l'ID " + req.params.commandeID,
       });
     });
 };
